@@ -67,7 +67,7 @@ app.get('/idea', (req, res) => {
         if (err) {
             console.error(err.message);
             res.status(500).json({ message: 'get/idea에서 오류 발생' });
-        } else{
+        } else {
             res.status(200).json(results);
         }
     });
@@ -84,6 +84,32 @@ app.get('/idea/:id', (req, res) => {
             res.status(200).json(results);
         }
     })
+});
+
+app.post('/idea', (req, res) => {
+    const { userid, q1, q2, q3, q4, q5, q6, checking, memo, title, color } = req.body;
+
+    db.query('INSERT into idea (userid, q1, q2, q3, q4, q5, q6, checking, memo, title, color) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [userid, q1, q2, q3, q4, q5, q6, checking, memo, title, color], (err, results) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ message: 'post/user에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
+    });
+});
+
+app.post('/idea', (req, res) => {
+    const { userid, q1, q2, q3, q4, q5, q6, checking, memo, title, color } = req.body;
+
+    db.query('INSERT into idea (userid, q1, q2, q3, q4, q5, q6, checking, memo, title, color) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [userid, q1, q2, q3, q4, q5, q6, checking, memo, title, color], (err, results) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ message: 'post/user에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
+    });
 });
 
 app.listen(port, () => {
