@@ -24,7 +24,31 @@ db.connect((err) => {
     }
 });
 
+app.get('/user', (req, res) => {
+    db.query('SELECT * FROM user', (err, results) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ message: 'get/user에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
+    });
+});
 
+app.get('/user', (req, res) => {
+    db.query('SELECT * FROM user', (err, results) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ message: 'get/user에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
+    });
+});
+
+app.post('/user', (req, res)=>{
+
+});
 
 
 app.listen(port, () => {
