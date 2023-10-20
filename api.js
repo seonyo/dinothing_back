@@ -36,11 +36,11 @@ app.get('/user', (req, res) => {
     });
 });
 
-app.get('/user/:id', (req, res)=>{
+app.get('/user/:id', (req, res) => {
     const { id } = req.params;
 
-    db.query('SELECT * FROM user where id = ?', [id], (err, results)=>{
-        if(err){
+    db.query('SELECT * FROM user where id = ?', id, (err, results) => {
+        if (err) {
             console.log(err.message);
             res.status(500).json({ message: 'get/user:id에서 오류 발생' });
         } else {
@@ -50,13 +50,24 @@ app.get('/user/:id', (req, res)=>{
 });
 
 app.post('/user', (req, res) => {
-    const {name, userid, userpw} = req.body;
+    const { name, userid, userpw } = req.body;
 
-    db.query('INSERT into user (name, userid, userpw) VALUES (?,?,?)', [name, userid, userpw], (err, results)=> {
+    db.query('INSERT into user (name, userid, userpw) VALUES (?,?,?)', [name, userid, userpw], (err, results) => {
         if (err) {
             console.error(err.message);
             res.status(500).json({ message: 'post/user에서 오류 발생' });
         } else {
+            res.status(200).json(results);
+        }
+    });
+});
+
+app.get('/idea', (req, res) => {
+    db.query('SELECT * from idea', (err, results) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ message: 'post/user에서 오류 발생' });
+        } else{
             res.status(200).json(results);
         }
     });
