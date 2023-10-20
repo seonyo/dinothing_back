@@ -81,13 +81,19 @@ app.get('/idea/:id', (req, res) => {
             console.log(err.message);
             res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
         } else {
-            console.log(results);
-            db.query('SELECT name FROM user where id = ?', [id], (err, result)=>{
+            db.query('SELECT name FROM user where id = ?', [id], (err, result) => {
                 if (err) {
                     console.log(err.message);
                     res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
                 } else {
-                    res.status(200).json({ results, result });
+                    db.query('SELECT * from idea where id = ?', [id], (err, idea) => {
+                        if (err) {
+                            console.log(err.message);
+                            res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
+                        } else{
+                            res.status(200).json({ results, result,idea });
+                        }
+                    })
                 }
             })
         }
@@ -114,14 +120,14 @@ app.put('/idea/:id', (req, res) => {
 
     db.query('UPDATE idea SET memo = ? WHERE IFNULL(?, 0)', [content, id], (err, results) => {
         if (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'put/idea에서 오류 발생' });
-      } else {
-        res.status(200).json(results);
-      }
+            console.error(err.message);
+            res.status(500).json({ message: 'put/idea에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
     });
-  });
-  
+});
+
 app.listen(port, () => {
     console.log(`Example app listeing on port ${port}`)
 })
