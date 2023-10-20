@@ -66,13 +66,25 @@ app.get('/idea', (req, res) => {
     db.query('SELECT * from idea', (err, results) => {
         if (err) {
             console.error(err.message);
-            res.status(500).json({ message: 'post/user에서 오류 발생' });
+            res.status(500).json({ message: 'get/idea에서 오류 발생' });
         } else{
             res.status(200).json(results);
         }
     });
 });
 
+app.get('/idea/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.query('SELECT * FROM idea where id = ?', id, (err, results) => {
+        if (err) {
+            console.log(err.message);
+            res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
+    })
+});
 
 app.listen(port, () => {
     console.log(`Example app listeing on port ${port}`)
