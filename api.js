@@ -76,14 +76,23 @@ app.get('/idea', (req, res) => {
 app.get('/idea/:id', (req, res) => {
     const { id } = req.params;
 
-    db.query('SELECT * FROM idea where id = ?', id, (err, results) => {
+    db.query('SELECT * FROM idea where userid = ?', [id], (err, results) => {
         if (err) {
             console.log(err.message);
             res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
         } else {
-            res.status(200).json(results);
+            console.log(results);
+            db.query('SELECT name FROM user where id = ?', [id], (err, result)=>{
+                if (err) {
+                    console.log(err.message);
+                    res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
+                } else {
+                    res.status(200).json({ results, result });
+                }
+            })
         }
     })
+
 });
 
 app.post('/idea', (req, res) => {
