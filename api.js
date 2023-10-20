@@ -36,6 +36,19 @@ app.get('/user', (req, res) => {
     });
 });
 
+app.get('/user/:id', (req, res)=>{
+    const { id } = req.params;
+
+    db.query('SELECT * FROM user where id = ?', [id], (err, results)=>{
+        if(err){
+            console.log(err.message);
+            res.status(500).json({ message: 'get/user:id에서 오류 발생' });
+        } else {
+            res.status(200).json(results);
+        }
+    })
+});
+
 app.post('/user', (req, res) => {
     const {name, userid, userpw} = req.body;
 
