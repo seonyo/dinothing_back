@@ -6,6 +6,7 @@ const mysql = require('mysql2');
 
 const port = 3000;
 
+app.use(express.json());
 app.use(cors());
 
 const db = mysql.createConnection({
@@ -35,19 +36,17 @@ app.get('/user', (req, res) => {
     });
 });
 
-app.get('/user', (req, res) => {
-    db.query('SELECT * FROM user', (err, results) => {
+app.post('/user', (req, res) => {
+    const {name, userid, userpw} = req.body;
+
+    db.query('INSERT into user (name, userid, userpw) VALUES (?,?,?)', [name, userid, userpw], (err, results)=> {
         if (err) {
             console.error(err.message);
-            res.status(500).json({ message: 'get/user에서 오류 발생' });
+            res.status(500).json({ message: 'post/user에서 오류 발생' });
         } else {
             res.status(200).json(results);
         }
     });
-});
-
-app.post('/user', (req, res)=>{
-
 });
 
 
