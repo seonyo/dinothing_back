@@ -52,23 +52,23 @@ app.get('/user/:id', (req, res) => {
 });
 
 app.post('/user', (req, res) => {
-        const { name, userid, userpw } = req.body;
-        const salt = crypto.randomBytes(128).toString('base64');
-        crypto.pbkdf2(userpw, salt, 10235, 64, "sha512", (err, key) => {
-            if (err) {
-                console.log(err);
-                return;
-            } else {
-                db.query('INSERT into user (name, userid, userpw) VALUES (?,?,?)', [name, userid, key], (err, results) => {
-                    if (err) {
-                        console.error(err.message);
-                        return res.status(500).json({ message: 'post/user에서 오류 발생' });
-                    } else {
-                        return res.status(200).json(results);
-                    }
-                });
-            }
-        })
+    const { name, userid, userpw } = req.body;
+    const salt = crypto.randomBytes(128).toString('base64');
+    crypto.pbkdf2(userpw, salt, 10235, 64, "sha512", (err, key) => {
+        if (err) {
+            console.log(err);
+            return;
+        } else {
+            db.query('INSERT into user (name, userid, userpw, SALT) VALUES (?,?,?,?)', [name, userid, key, salt], (err, results) => {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).json({ message: 'post/user에서 오류 발생' });
+                } else {
+                    return res.status(200).json(results);
+                }
+            });
+        }
+    })
 });
 
 app.get('/idea', (req, res) => {
