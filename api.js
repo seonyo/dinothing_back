@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const crypto = require('crypto');
+
 const app = express();
 const mysql = require('mysql2');
 
@@ -50,16 +52,23 @@ app.get('/user/:id', (req, res) => {
 });
 
 app.post('/user', (req, res) => {
-    const { name, userid, userpw } = req.body;
-
-    db.query('INSERT into user (name, userid, userpw) VALUES (?,?,?)', [name, userid, userpw], (err, results) => {
-        if (err) {
-            console.error(err.message);
-            res.status(500).json({ message: 'post/user에서 오류 발생' });
-        } else {
-            res.status(200).json(results);
-        }
-    });
+        const { name, userid, userpw } = req.body;
+        const salt = crypto.randomBytes(128).toString('base64');
+        crypto.pbkdf2(userpw, salt, 10235, 64, "sha512", (err, key) => {
+            if (err) {
+                console.log(err);
+                return;
+            } else {
+                db.query('INSERT into user (name, userid, userpw) VALUES (?,?,?)', [name, userid, key], (err, results) => {
+                    if (err) {
+                        console.error(err.message);
+                        return res.status(500).json({ message: 'post/user에서 오류 발생' });
+                    } else {
+                        return res.status(200).json(results);
+                    }
+                });
+            }
+        })
 });
 
 app.get('/idea', (req, res) => {
@@ -75,7 +84,6 @@ app.get('/idea', (req, res) => {
 
 app.get('/idea/:id', (req, res) => {
     const { id } = req.params;
-
     db.query('SELECT * FROM idea where userid = ?', [id], (err, results) => {
         if (err) {
             console.log(err.message);
@@ -90,8 +98,8 @@ app.get('/idea/:id', (req, res) => {
                         if (err) {
                             console.log(err.message);
                             res.status(500).json({ message: 'get/idea:id에서 오류 발생' });
-                        } else{
-                            res.status(200).json({ results, result,idea });
+                        } else {
+                            res.status(200).json({ results, result, idea });
                         }
                     })
                 }
