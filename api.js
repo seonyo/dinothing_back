@@ -27,6 +27,19 @@ db.connect((err) => {
     }
 });
 
+//salt의 정보를 가져오는 미들웨어
+app.post('/login', (req, res, next)=>{
+    db.query('SELECT SALT FROM user', (err, result) => {
+        if(err){
+            console.log(err.message)
+        } else {
+            const salt = result[0].SALT;
+            req.salt = salt;
+            next();
+        }
+    })
+})
+
 app.get('/user', (req, res) => {
     db.query('SELECT * FROM user', (err, results) => {
         if (err) {
@@ -71,6 +84,10 @@ app.post('/user', (req, res) => {
     })
 });
 
+app.post('/login', (req, res) => {
+    const {userid, userpw} = req.body;
+    console.log(req.salt)    
+})
 app.get('/idea', (req, res) => {
     db.query('SELECT * from idea', (err, results) => {
         if (err) {
