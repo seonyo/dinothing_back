@@ -1,7 +1,10 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const session = require('express-session');
 
 const app = express();
 const mysql = require('mysql2');
@@ -10,6 +13,11 @@ const port = 3000;
 
 app.use(express.json());
 app.use(cors());
+app.use(session({
+    secret : process.env.SESSION_ID,
+    resave : 'false',
+    saveUninitialized: 'true'
+}))
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -31,12 +39,12 @@ db.connect((err) => {
 app.post('/login', (req, res, next)=>{
     const {userid, userpw} = req.body;
     db.query('SELECT SALT FROM user where userid = ?', [userid], (err, result) => {
-        if(err){
-            console.log(err.message)
-        } else {
+        if(result.length === 1){
             const salt = result[0].SALT.toString();
             req.salt = salt;
             next();
+        } else{
+            res.status(404).json({message : "아이디가 일치하지 않음"})
         }
     })
 })
@@ -88,13 +96,11 @@ app.post('/user', (req, res) => {
 app.post('/login', (req, res) => {
     const {userid, userpw} = req.body;
     const salt = req.salt;
-
     crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key)=>{
         if(err){
             console.log(err);
             return;
         } else{
-            const hashedPassword = key.toString('hex');
             db.query('SELECT userid, userpw from user where userid = ? AND userpw = ?', [userid, key], (err, result)=> {
                 if(result.length === 1){
                     res.status(200).json(result);
