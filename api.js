@@ -5,19 +5,26 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const session = require('express-session');
+const memoryStore = require('memorystore')(session);
 
 const app = express();
 const mysql = require('mysql2');
 
 const port = 3000;
+const maxAge = 1000 * 60 * 5;
+const sessionObj = {
+    secret : process.env.SESSION_ID,
+    resave : 'false',
+    saveUninitialized: 'true',
+    store : new memoryStore({checkPeriod : maxAge}),
+    cookie: {
+        maxAge
+    }
+};
 
 app.use(express.json());
 app.use(cors());
-app.use(session({
-    secret : process.env.SESSION_ID,
-    resave : 'false',
-    saveUninitialized: 'true'
-}))
+app.use(session(sessionObj));
 
 const db = mysql.createConnection({
     host: 'localhost',
