@@ -29,11 +29,12 @@ db.connect((err) => {
 
 //salt의 정보를 가져오는 미들웨어
 app.post('/login', (req, res, next)=>{
-    db.query('SELECT SALT FROM user', (err, result) => {
+    const {userid, userpw} = req.body;
+    db.query('SELECT SALT FROM user where userid = ?', [userid], (err, result) => {
         if(err){
             console.log(err.message)
         } else {
-            const salt = result[0].SALT;
+            const salt = result[0].SALT.toString();
             req.salt = salt;
             next();
         }
@@ -67,7 +68,7 @@ app.get('/user/:id', (req, res) => {
 app.post('/user', (req, res) => {
     const { name, userid, userpw } = req.body;
     const salt = crypto.randomBytes(128).toString('base64');
-    crypto.pbkdf2(userpw, salt, 10235, 64, "sha512", (err, key) => {
+    crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key) => {
         if (err) {
             console.log(err);
             return;
@@ -86,8 +87,25 @@ app.post('/user', (req, res) => {
 
 app.post('/login', (req, res) => {
     const {userid, userpw} = req.body;
-    console.log(req.salt)    
+    const salt = req.salt;
+
+    crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key)=>{
+        if(err){
+            console.log(err);
+            return;
+        } else{
+            const hashedPassword = key.toString('hex');
+            db.query('SELECT userid, userpw from user where userid = ? AND userpw = ?', [userid, key], (err, result)=> {
+                if(result.length === 1){
+                    res.status(200).json(result);
+                } else {
+                    res.status(404).json({message : '아이디나 비밀번호가 옳지 않음'})
+                }
+            })
+        }
+    })
 })
+
 app.get('/idea', (req, res) => {
     db.query('SELECT * from idea', (err, results) => {
         if (err) {
