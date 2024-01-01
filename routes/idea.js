@@ -1,13 +1,5 @@
 const router = require('express').Router();
-const mysql = require('mysql2');
-
-
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '990327',
-    database: 'dinothing'
-});
+const db = require('../db/db');
 
 router.get('/', (req, res) => {
     db.query('SELECT * from idea', (err, results) => {

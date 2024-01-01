@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const crypto = require('crypto');
-const mysql = require('mysql2');
 const session = require('express-session');
+const db = require('../db/db');
 
 const maxAge = 1000 * 60 * 5;
 
@@ -11,13 +11,6 @@ const sessionObj = {
     saveUninitialized: true,
     maxAge: 1000 * 60 * 5
 };
-
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '990327',
-    database: 'dinothing'
-});
 
 router.use(session(sessionObj));
 
