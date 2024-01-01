@@ -39,7 +39,7 @@ db.connect((err) => {
 });
 
 //salt의 정보를 가져오는 미들웨어
-app.post('/login', (req, res, next) => {
+app.post('/auth/login', (req, res, next) => {
     const { userid, userpw } = req.body;
     db.query('SELECT SALT FROM user where userid = ?', [userid], (err, result) => {
         if (result.length === 1) {
@@ -52,7 +52,7 @@ app.post('/login', (req, res, next) => {
     })
 })
 
-app.get('/check-login', (req, res) => {
+app.get('/auth/check-login', (req, res) => {
     console.log(req.session.dinothingid)
     if (!req.session.dinothingid) {
         res.json({message : false});
@@ -72,7 +72,7 @@ app.get('/user', (req, res) => {
     });
 });
 
-app.get('/user/:id', (req, res) => {
+app.get('/auth/user/:id', (req, res) => {
     const { id } = req.params;
     db.query('SELECT * FROM user where id = ?', id, (err, results) => {
         if (err) {
@@ -84,7 +84,7 @@ app.get('/user/:id', (req, res) => {
     })
 });
 
-app.post('/user', (req, res) => {
+app.post('/auth/user', (req, res) => {
     const { name, userid, userpw } = req.body;
     const salt = crypto.randomBytes(128).toString('base64');
     crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key) => {
@@ -104,7 +104,7 @@ app.post('/user', (req, res) => {
     })
 });
 
-app.post('/login', (req, res) => {
+app.post('/auth/login', (req, res) => {
     const { userid, userpw } = req.body;
     const salt = req.salt;
     crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key) => {
@@ -130,7 +130,7 @@ app.post('/login', (req, res) => {
     })
 })
 
-app.get('/idea', (req, res) => {
+app.get('/auth/idea', (req, res) => {
     db.query('SELECT * from idea', (err, results) => {
         if (err) {
             console.error(err.message);
