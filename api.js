@@ -5,7 +5,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const session = require('express-session');
-const memoryStore = require('memorystore')(session);
 
 const app = express();
 const mysql = require('mysql2');
@@ -13,13 +12,10 @@ const mysql = require('mysql2');
 const port = 3000;
 const maxAge = 1000 * 60 * 5;
 const sessionObj = {
-    secret : process.env.SESSION_ID,
-    resave : 'false',
-    saveUninitialized: 'true',
-    store : new memoryStore({checkPeriod : maxAge}),
-    cookie: {
-        maxAge
-    }
+    secret: process.env.SESSION_ID,
+    resave: false,
+    saveUninitialized: true,
+    maxAge: 1000 * 60 * 5
 };
 
 app.use(express.json());
@@ -43,17 +39,26 @@ db.connect((err) => {
 });
 
 //salt의 정보를 가져오는 미들웨어
-app.post('/login', (req, res, next)=>{
-    const {userid, userpw} = req.body;
+app.post('/login', (req, res, next) => {
+    const { userid, userpw } = req.body;
     db.query('SELECT SALT FROM user where userid = ?', [userid], (err, result) => {
-        if(result.length === 1){
+        if (result.length === 1) {
             const salt = result[0].SALT.toString();
             req.salt = salt;
             next();
-        } else{
-            res.status(404).json({message : "아이디가 일치하지 않음"})
+        } else {
+            res.status(404).json({ message: "아이디가 일치하지 않음" })
         }
     })
+})
+
+app.get('/check-login', (req, res) => {
+    console.log(req.session.dinothingid)
+    if (!req.session.dinothingid) {
+        res.json({message : false});
+    }else {
+        res.json({message : true});
+    }
 })
 
 app.get('/user', (req, res) => {
@@ -69,7 +74,6 @@ app.get('/user', (req, res) => {
 
 app.get('/user/:id', (req, res) => {
     const { id } = req.params;
-
     db.query('SELECT * FROM user where id = ?', id, (err, results) => {
         if (err) {
             console.log(err.message);
@@ -101,18 +105,25 @@ app.post('/user', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const {userid, userpw} = req.body;
+    const { userid, userpw } = req.body;
     const salt = req.salt;
-    crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key)=>{
-        if(err){
+    crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key) => {
+        if (err) {
             console.log(err);
             return;
-        } else{
-            db.query('SELECT userid, userpw from user where userid = ? AND userpw = ?', [userid, key], (err, result)=> {
-                if(result.length === 1){
+        } else {
+            db.query('SELECT userid, userpw from user where userid = ? AND userpw = ?', [userid, key], (err, result) => {
+                if (result.length === 1) {
                     res.status(200).json(result);
+                    if (!req.session.dinothingid) {
+                        // 세션이 아직 생성되지 않았다면 세션 생성
+                        req.session.dinothingid = userid;
+                        console.log("세션 생성:", req.session.dinothingid);
+                    } else {
+                        console.log("이미 세션이 존재합니다:", req.session.dinothingid);
+                    }    
                 } else {
-                    res.status(404).json({message : '아이디나 비밀번호가 옳지 않음'})
+                    res.status(404).json({ message: '아이디나 비밀번호가 옳지 않음' })
                 }
             })
         }
