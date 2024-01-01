@@ -8,6 +8,7 @@ const saltRequired = (req, res, next) => {
             req.salt = salt;
             next();
         } else {
+            console.log(result.length);
             res.status(404).json({ message: "아이디가 일치하지 않음" })
         }
     })

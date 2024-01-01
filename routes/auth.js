@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const crypto = require('crypto');
 const session = require('express-session');
 const authMiddleware = require('./auth-controller');
 const saltMiddleware = require('../middlewares/salt');
