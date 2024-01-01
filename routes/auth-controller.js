@@ -1,6 +1,7 @@
 const db = require('../db/db');
 const crypto = require('crypto');
 
+
 exports.checkLoginGetMid = (req, res) => {
     console.log(req.session.dinothingid)
     if (!req.session.dinothingid) {

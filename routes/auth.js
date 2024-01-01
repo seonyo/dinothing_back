@@ -11,12 +11,11 @@ const sessionObj = {
 };
 
 router.use(session(sessionObj));
-router.use(saltMiddleware);
 
 router.get('/check-login', authMiddleware.checkLoginGetMid);
 router.get('/user', authMiddleware.userGetMid);
 router.get('/user/:id', authMiddleware.userIndexGetMid);
 router.post('/user', authMiddleware.userPostMid);
-router.post('/login', authMiddleware.loginPostMid);
+router.post('/login', saltMiddleware, authMiddleware.loginPostMid);
 
 module.exports = router;
