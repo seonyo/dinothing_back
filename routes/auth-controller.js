@@ -57,7 +57,6 @@ exports.userPostMid = (req, res) => {
 exports.loginPostMid = (req, res) => {
     const { userid, userpw } = req.body;
     let salt = req.salt;
-
     crypto.pbkdf2(userpw, salt, 9234, 64, "sha512", (err, key) => {
         if (err) {
             console.log(err);
@@ -69,7 +68,9 @@ exports.loginPostMid = (req, res) => {
                     if (!req.session.dinothingid) {
                         // 세션이 아직 생성되지 않았다면 세션 생성
                         req.session.dinothingid = userid;
-                        console.log("세션 생성:", req.session.dinothingid);
+                        req.session.save(()=>{
+                            console.log("세션 생성:", req.session.dinothingid);
+                        })
                     } else {
                         console.log("이미 세션이 존재합니다:", req.session.dinothingid);
                     }    
